@@ -1,4 +1,1 @@
-gh-pages-spa
-============
-
-Template for using Github Pages to host a Single-Page app
+This is the `gh-pages` branch. Add a `CNAME` file ([see instructions](https://help.github.com/articles/setting-up-a-custom-domain-with-pages)) for a custom domain.
