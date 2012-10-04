@@ -23,6 +23,7 @@ GEM
       thor (>= 0.14.6)
     guard-shell (0.5.1)
       guard (>= 1.1.0)
+    haml (3.1.7)
     haml_coffee_assets (1.5.1)
       coffee-script (>= 1.0.0)
       sprockets (>= 2.0.3)
@@ -87,6 +88,7 @@ DEPENDENCIES
   execjs
   guard
   guard-shell
+  haml
   haml_coffee_assets
   jasmine
   less

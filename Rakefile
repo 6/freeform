@@ -1,3 +1,4 @@
+require 'haml'
 require 'haml_coffee_assets'
 require 'sprockets'
 require 'sprockets-sass'
@@ -42,7 +43,7 @@ namespace :assets do
   desc 'compile/compress assets to static files for testing purposes'
 
   task :compile_all do
-    %w{javascripts stylesheets specs}.each do |asset|
+    %w{javascripts stylesheets specs htmls}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
     puts "Finished asset precompilation".blue
@@ -59,6 +60,10 @@ namespace :assets do
   task :compile_specs do
     compile_asset('spec/.compiled', 'spec.js', :test)
   end
+
+  task :compile_htmls do
+    compile_html('index.haml')
+  end
 end
 
 def compile_asset(parent_dir, filename, environment)
@@ -66,4 +71,18 @@ def compile_asset(parent_dir, filename, environment)
   FileUtils.mkdir_p(parent_dir)
   sprockets.find_asset(filename).write_to(File.join(parent_dir, filename))
   puts "Compiled: #{filename.green}"
+end
+
+def compile_html(filename, scope = Object.new, locals = {})
+  contents = File.read("./htmls/#{filename}")
+  html = begin
+    Haml::Engine.new(contents).render(scope, locals)
+  rescue => e
+    "<h1>#{e.message}</h1>"
+  end
+  new_filename = "#{filename.split(".")[0..-2].join(".")}.html"
+  File.open("./#{new_filename}", "w") do |file|
+    file.write(html)
+  end
+  puts "Compiled: #{filename.magenta}"
 end

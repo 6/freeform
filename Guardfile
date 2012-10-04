@@ -5,6 +5,8 @@ guard :shell do
       "javascripts"
     elsif %r{^stylesheets/.+$}.match path
       "stylesheets"
+    elsif %r{^htmls/.+$}.match path
+      "htmls"
     elsif %r{^spec/javascripts/.+$}.match path
       "specs"
     end

@@ -6,6 +6,7 @@ group :development, :test do
   gem 'execjs'
   gem 'guard'
   gem 'guard-shell'
+  gem 'haml'
   gem 'haml_coffee_assets'
   gem 'less'
   gem 'rake'
