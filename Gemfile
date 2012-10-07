@@ -1,6 +1,7 @@
 source :rubygems
 
 group :development, :test do
+  gem 'andand'
   gem 'coffee-script'
   gem 'colored'
   gem 'execjs'
