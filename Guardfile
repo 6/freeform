@@ -7,6 +7,8 @@ guard :shell do
       "stylesheets"
     elsif match = %r{^htmls/(.+)$}.match(path)
       ["html", [match[1]]]
+    elsif match = %r{^static/(.+)$}.match(path)
+      ["static", [match[1]]]
     elsif %r{^spec/javascripts/.+$}.match path
       "specs"
     end

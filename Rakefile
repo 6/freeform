@@ -44,7 +44,7 @@ namespace :assets do
   desc 'compile/compress assets to static files for testing purposes'
 
   task :compile_all do
-    %w{javascripts stylesheets specs html}.each do |asset|
+    %w{javascripts stylesheets specs html static}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
     puts "Finished asset precompilation".blue
@@ -70,6 +70,20 @@ namespace :assets do
     Dir['htmls/*.haml'].each do |path|
       relative = path.split("/")[1..-1].join("/")
       compile_html(relative)  unless relative.end_with? "_layout.haml"
+    end
+  end
+
+  # Not actually compiling, just copying file to directory
+  task :compile_static, :filename do |t, args|
+    if filename = args.andand[:filename]
+      copy_static(filename)
+    else
+      # Copy all static files
+      Dir['static/**/*'].each do |path|
+        next  unless File.file?(path)
+        relative = path.split("/")[1..-1].join("/")
+        copy_static(relative)
+      end
     end
   end
 end
@@ -104,4 +118,13 @@ end
 
 def haml(contents, scope = Object.new, locals = {}, &block)
   Haml::Engine.new(contents).render(scope, locals, &block)
+end
+
+def copy_static(filename)
+  if filename.split("/").size > 1
+    folders = filename.split("/")[0..-2].join("/")
+    FileUtils.mkdir_p("#{CompileFolder}/#{folders}")
+  end
+  FileUtils.copy("./static/#{filename}", "#{CompileFolder}/#{filename}")
+  puts "Copied: #{filename.yellow}"
 end
