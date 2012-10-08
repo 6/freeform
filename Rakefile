@@ -43,6 +43,7 @@ namespace :assets do
   desc 'compile/compress assets to static files for testing purposes'
 
   task :compile_all do
+    FileUtils.rm_rf(CompileFolder)
     %w{javascripts stylesheets specs html static}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
