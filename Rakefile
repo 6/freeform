@@ -63,15 +63,23 @@ namespace :assets do
   end
 
   task :compile_html, :path do |t, args|
+    def compile_all_htmls(folder = "**")
+      Dir["htmls/#{folder}/*.haml"].each do |path|
+        next  if path.end_with?("_layout.haml")
+        _, folder, filename = path.split("/")
+        compile_html(folder, filename)
+      end
+    end
+
     if path = args.andand[:path]
       folder, filename = path.split("/")
-      return compile_html(folder, filename)  unless filename == "_layout.haml"
-    end
-    # Compile all HTML files (except for layouts)
-    Dir["htmls/#{folder || '**'}/*.haml"].each do |path|
-      next  if path.end_with?("_layout.haml")
-      _, folder, filename = path.split("/")
-      compile_html(folder, filename)
+      if filename == "_layout.haml"
+        compile_all_htmls(folder)
+      else
+        compile_html(folder, filename)
+      end
+    else
+      compile_all_htmls
     end
   end
 
