@@ -4,6 +4,13 @@ require 'sprockets'
 require 'sprockets-sass'
 require 'yui/compressor'
 require 'uglifier'
+require 'andand'
+require 'colored'
+require 'guard'
+require 'jasmine'
+load 'jasmine/tasks/jasmine.rake'
+
+CompileFolder = ".compiled"
 
 class SprocketsEnvironmentBuilder
   def self.build(environment = :development)
@@ -12,7 +19,6 @@ class SprocketsEnvironmentBuilder
 
     sprockets.append_path 'javascripts'
     sprockets.append_path 'stylesheets'
-    sprockets.append_path 'templates'
     sprockets.append_path 'spec/javascripts'
 
     if [:production, :test].include? environment
@@ -23,11 +29,6 @@ class SprocketsEnvironmentBuilder
     sprockets
   end
 end
-
-require 'colored'
-require 'guard'
-require 'jasmine'
-load 'jasmine/tasks/jasmine.rake'
 
 task :guard do
   Rake::Task["assets:compile_all"].invoke
@@ -43,26 +44,33 @@ namespace :assets do
   desc 'compile/compress assets to static files for testing purposes'
 
   task :compile_all do
-    %w{javascripts stylesheets specs htmls}.each do |asset|
+    %w{javascripts stylesheets specs html}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
     puts "Finished asset precompilation".blue
   end
 
   task :compile_javascripts do
-    compile_asset('.compiled', 'application.js', :development)
+    compile_asset(CompileFolder, 'application.js', :development)
   end
 
   task :compile_stylesheets do
-    compile_asset('.compiled', 'application.css', :development)
+    compile_asset(CompileFolder, 'application.css', :development)
   end
 
   task :compile_specs do
-    compile_asset('spec/.compiled', 'spec.js', :test)
+    compile_asset("spec/#{CompileFolder}", 'spec.js', :test)
   end
 
-  task :compile_htmls do
-    compile_html('index.haml')
+  task :compile_html, :filename do |t, args|
+    if filename = args.andand[:filename]
+      return compile_html(filename)  unless filename.end_with? "_layout.haml"
+    end
+    # Compile all HTML files (except for layouts)
+    Dir['htmls/*.haml'].each do |path|
+      relative = path.split("/")[1..-1].join("/")
+      compile_html(relative)  unless relative.end_with? "_layout.haml"
+    end
   end
 end
 
@@ -73,16 +81,27 @@ def compile_asset(parent_dir, filename, environment)
   puts "Compiled: #{filename.green}"
 end
 
-def compile_html(filename, scope = Object.new, locals = {})
+def compile_html(filename)
   contents = File.read("./htmls/#{filename}")
   html = begin
-    Haml::Engine.new(contents).render(scope, locals)
+    if Dir['htmls/_layout.haml'].empty?
+      haml(contents)
+    else
+      layout_contents = File.read("./htmls/_layout.haml")
+      haml layout_contents, Object.new, {} do
+        haml(contents)
+      end
+    end
   rescue => e
-    "<h1>#{e.message}</h1>"
+    "<h1 style='color:red'>#{e.message}</h1>"
   end
   new_filename = "#{filename.split(".")[0..-2].join(".")}.html"
-  File.open("./#{new_filename}", "w") do |file|
+  File.open("./#{CompileFolder}/#{new_filename}", "w") do |file|
     file.write(html)
   end
   puts "Compiled: #{filename.magenta}"
+end
+
+def haml(contents, scope = Object.new, locals = {}, &block)
+  Haml::Engine.new(contents).render(scope, locals, &block)
 end
