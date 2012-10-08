@@ -62,14 +62,16 @@ namespace :assets do
     compile_asset("spec/#{CompileFolder}", 'spec.js', :test)
   end
 
-  task :compile_html, :filename do |t, args|
-    if filename = args.andand[:filename]
-      return compile_html(filename)  unless filename.end_with? "_layout.haml"
+  task :compile_html, :path do |t, args|
+    if path = args.andand[:path]
+      folder, filename = path.split("/")
+      return compile_html(folder, filename)  unless filename == "_layout.haml"
     end
     # Compile all HTML files (except for layouts)
-    Dir['htmls/*.haml'].each do |path|
-      relative = path.split("/")[1..-1].join("/")
-      compile_html(relative)  unless relative.end_with? "_layout.haml"
+    Dir["htmls/#{folder || '**'}/*.haml"].each do |path|
+      next  if path.end_with?("_layout.haml")
+      _, folder, filename = path.split("/")
+      compile_html(folder, filename)
     end
   end
 
@@ -95,13 +97,13 @@ def compile_asset(parent_dir, filename, environment)
   puts "Compiled: #{filename.green}"
 end
 
-def compile_html(filename)
-  contents = File.read("./htmls/#{filename}")
+def compile_html(folder, filename)
+  contents = File.read("./htmls/#{folder}/#{filename}")
   html = begin
-    if Dir['htmls/_layout.haml'].empty?
+    if Dir["htmls/#{folder}/_layout.haml"].empty?
       haml(contents)
     else
-      layout_contents = File.read("./htmls/_layout.haml")
+      layout_contents = File.read("./htmls/#{folder}/_layout.haml")
       haml layout_contents, Object.new, {} do
         haml(contents)
       end
@@ -109,11 +111,16 @@ def compile_html(filename)
   rescue => e
     "<h1 style='color:red'>#{e.message}</h1>"
   end
+  # _root folder is a special case where files will be placed in root
+  new_path = "./#{CompileFolder}/#{folder == '_root' ? "" : "#{folder}/"}"
+  unless File.directory?(new_path)
+    FileUtils.mkdir_p(new_path)
+  end
   new_filename = "#{filename.split(".")[0..-2].join(".")}.html"
-  File.open("./#{CompileFolder}/#{new_filename}", "w") do |file|
+  File.open("#{new_path}#{new_filename}", "w") do |file|
     file.write(html)
   end
-  puts "Compiled: #{filename.magenta}"
+  puts "Compiled: #{folder}/#{filename.magenta}"
 end
 
 def haml(contents, scope = Object.new, locals = {}, &block)
