@@ -36,7 +36,6 @@ task :guard do
 end
 
 task :test do
-  Rake::Task["assets:compile_all"].invoke
   Rake::Task["jasmine"].invoke
 end
 
