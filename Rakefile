@@ -101,7 +101,7 @@ end
 def compile_asset(parent_dir, filename, environment)
   sprockets = SprocketsEnvironmentBuilder.build(environment)
   FileUtils.mkdir_p(parent_dir)
-  sprockets.find_asset(filename).write_to(File.join(parent_dir, filename))
+  sprockets.find_asset(filename).write_to(File.join(parent_dir, "assets", filename))
   puts "Compiled: #{filename.green}"
 end
 
