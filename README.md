@@ -1,3 +1,5 @@
-`rake guard` to watch for changes and recompile files as necessary.
+`rake guard` to watch for changes and recompile files as necessary. Run this before starting the dev server or Jasmine.
 
-`rake jasmine` for testing Javascripts.
+`./server.rb` for running the development server.
+
+`rake test` for testing Javascripts.
