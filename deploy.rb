@@ -11,6 +11,9 @@ puts "* Moving compiled assets to gh-pages".green
 # TODO better way to do this?
 `git branch -D gh-pages`
 `git checkout -b gh-pages`
+`rm .gitignore`
+`echo "/.compiled" > .gitignore`
+`git clean -f -d`
 `git rm -r *`
 `mv .compiled/* .`
 `git add .`
