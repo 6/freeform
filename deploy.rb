@@ -9,7 +9,7 @@ puts "* Compiling assets".green
 puts "* Moving compiled assets to gh-pages".green
 
 # TODO better way to do this?
-`git branch -d gh-pages`
+`git branch -D gh-pages`
 `git checkout -b gh-pages`
 `git rm -r *`
 `mv .compiled/* .`
