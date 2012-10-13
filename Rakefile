@@ -10,6 +10,7 @@ require 'guard'
 require 'jasmine'
 load 'jasmine/tasks/jasmine.rake'
 
+ENV['RACK_ENV'] ||= 'development'
 CompileFolder = ".compiled"
 
 class SprocketsEnvironmentBuilder
@@ -52,11 +53,11 @@ namespace :assets do
   end
 
   task :compile_javascripts do
-    compile_asset(CompileFolder, 'application.js', :development)
+    compile_asset(CompileFolder, 'application.js', ENV['RACK_ENV'])
   end
 
   task :compile_stylesheets do
-    compile_asset(CompileFolder, 'application.css', :development)
+    compile_asset(CompileFolder, 'application.css', ENV['RACK_ENV'])
   end
 
   task :compile_specs do

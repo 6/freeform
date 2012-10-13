@@ -2,6 +2,8 @@
 
 require 'colored'
 
+ENV['RACK_ENV'] = 'production'
+
 puts "* Compiling assets".green
 
 `rake assets:compile_all`
