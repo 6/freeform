@@ -3,6 +3,7 @@
 # from: http://chrismdp.github.com/2011/12/cache-busting-ruby-http-server/
 
 require 'webrick'
+require 'yaml'
 class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
   def prevent_caching(res)
     res['ETag']          = nil
@@ -18,8 +19,9 @@ class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
   end
 end
 
-server = WEBrick::HTTPServer.new :Port => 8000
+config = YAML.load_file('config/app.yml')
 
-server.mount '/', NonCachingFileHandler , "#{Dir.pwd}/.compiled"
+server = WEBrick::HTTPServer.new :Port => config['port']
+server.mount '/', NonCachingFileHandler , "#{Dir.pwd}/#{config['compile_folder']}"
 trap('INT') { server.stop }
 server.start

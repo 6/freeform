@@ -17,7 +17,7 @@ end
 load 'jasmine/tasks/jasmine.rake'
 
 ENV['RACK_ENV'] ||= 'development'
-CompileFolder = ".compiled"
+Config = YAML.load_file('config/app.yml')
 
 class SprocketsEnvironmentBuilder
   def self.build(environment = :development)
@@ -50,7 +50,7 @@ namespace :assets do
   desc 'compile/compress assets to static files for testing purposes'
 
   task :compile_all do
-    FileUtils.rm_rf(CompileFolder)
+    FileUtils.rm_rf(Config['compile_folder'])
     %w{javascripts stylesheets specs html static}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
@@ -58,29 +58,21 @@ namespace :assets do
   end
 
   task :compile_javascripts do
-    compile_asset(CompileFolder, 'application.js', ENV['RACK_ENV'])
+    compile_asset(Config['compile_folder'], 'application.js', ENV['RACK_ENV'])
   end
 
   task :compile_stylesheets do
-    compile_asset(CompileFolder, 'application.css', ENV['RACK_ENV'])
+    compile_asset(Config['compile_folder'], 'application.css', ENV['RACK_ENV'])
   end
 
   task :compile_specs do
-    compile_asset("spec/#{CompileFolder}", 'spec.js', :test)
+    compile_asset(Config['spec_compile_folder'], 'spec.js', :test)
   end
 
   task :compile_html, :path do |t, args|
-    def compile_all_htmls(folder = "**")
-      Dir["htmls/#{folder}/*.haml"].each do |path|
-        next  if path.end_with?("_layout.haml")
-        _, folder, filename = path.split("/")
-        compile_html(folder, filename)
-      end
-    end
-
     if path = args.andand[:path]
       folder, filename = path.split("/")
-      if filename == "_layout.haml"
+      if filename == Config['layout_filename']
         compile_all_htmls(folder)
       else
         compile_html(folder, filename)
@@ -112,13 +104,21 @@ def compile_asset(parent_dir, filename, environment)
   puts "Compiled: #{filename.green}"
 end
 
+def compile_all_htmls(folder = "**")
+  Dir["htmls/#{folder}/*.haml"].each do |path|
+    next  if path.end_with?(Config['layout_filename'])
+    _, folder, filename = path.split("/")
+    compile_html(folder, filename)
+  end
+end
+
 def compile_html(folder, filename)
   contents = File.read("./htmls/#{folder}/#{filename}")
   html = begin
-    if Dir["htmls/#{folder}/_layout.haml"].empty?
+    if Dir["htmls/#{folder}/#{Config['layout_filename']}"].empty?
       haml(contents)
     else
-      layout_contents = File.read("./htmls/#{folder}/_layout.haml")
+      layout_contents = File.read("./htmls/#{folder}/#{Config['layout_filename']}")
       haml layout_contents, Object.new, {} do
         haml(contents)
       end
@@ -127,7 +127,7 @@ def compile_html(folder, filename)
     "<h1 style='color:red'>#{e.message}</h1>"
   end
   # _root folder is a special case where files will be placed in root
-  new_path = "./#{CompileFolder}/#{folder == '_root' ? "" : "#{folder}/"}"
+  new_path = "./#{Config['compile_folder']}/#{folder == Config['root_folder'] ? "" : "#{folder}/"}"
   unless File.directory?(new_path)
     FileUtils.mkdir_p(new_path)
   end
@@ -145,8 +145,8 @@ end
 def copy_static(filename)
   if filename.split("/").size > 1
     folders = filename.split("/")[0..-2].join("/")
-    FileUtils.mkdir_p("#{CompileFolder}/#{folders}")
+    FileUtils.mkdir_p("#{Config['compile_folder']}/#{folders}")
   end
-  FileUtils.copy("./static/#{filename}", "#{CompileFolder}/#{filename}")
+  FileUtils.copy("./static/#{filename}", "#{Config['compile_folder']}/#{filename}")
   puts "Copied: #{filename.yellow}"
 end

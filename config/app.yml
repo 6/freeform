@@ -1,0 +1,12 @@
+# The port for the local server to run on
+port: 8000
+
+# Folders to which files are compiled
+compile_folder: .compiled
+spec_compile_folder: spec/.compiled
+
+
+# Views in the root folder will be placed in the root directory on compile
+root_folder: _root
+# Layout file which, if present, will surround all other views in that directory
+layout_filename: _layout.haml
