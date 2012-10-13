@@ -48,7 +48,6 @@ namespace :assets do
     %w{javascripts stylesheets specs html static}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
-    `touch #{CompileFolder}/.nojekyll`
     puts "Finished asset precompilation".blue
   end
 

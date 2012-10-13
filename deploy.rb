@@ -18,6 +18,7 @@ puts "* Moving compiled assets to gh-pages".green
 `git clean -f -d`
 `git rm -r *`
 `mv .compiled/* .`
+`touch .nojekyll`
 `git add .`
 `git commit -m 'Deploy #{Time.now.to_s}'`
 
