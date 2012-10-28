@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'colored'
+require 'yaml'
 
 ENV['RACK_ENV'] = 'production'
+config = YAML.load_file('config/app.yml')
 
 puts "* Compiling assets".green
 
@@ -19,6 +21,7 @@ puts "* Moving compiled assets to gh-pages".green
 `git rm -r *`
 `mv .compiled/* .`
 `touch .nojekyll`
+`echo "#{config['cname']}" > CNAME`  if config['cname']
 `git add .`
 `git commit -m 'Deploy #{Time.now.to_s}'`
 

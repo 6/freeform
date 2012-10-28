@@ -10,3 +10,6 @@ spec_compile_folder: spec/.compiled
 root_folder: _root
 # Layout file which, if present, will surround all other views in that directory
 layout_filename: _layout.haml
+
+# Host to use for gh-pages CNAME file
+cname: www.example.com
