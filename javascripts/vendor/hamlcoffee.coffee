@@ -13,7 +13,8 @@ class window.HAML
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
-      .replace(/'/g, "&apos;")
+      .replace(/'/g, "&#39;")
+      .replace(/\//g, "&#47;")
 
   # HAML Coffee clean value function. Beside just
   # cleaning `null` and `undefined` values, it
@@ -86,7 +87,7 @@ class window.HAML
   # @return [String] the surrounded text
   #
   @surround: (start, end, fn) ->
-    start + fn() + end
+    start + fn.call(@)?.replace(/^\s+|\s+$/g, '') + end
 
   # The succeed helper appends text to the function output
   # without whitespace in between.
@@ -96,7 +97,7 @@ class window.HAML
   # @return [String] the succeeded text
   #
   @succeed: (end, fn) ->
-    fn() + end
+    fn.call(@)?.replace(/\s+$/g, '') + end
 
   # The precede helper prepends text to the function output
   # without whitespace in between.
@@ -106,4 +107,31 @@ class window.HAML
   # @return [String] the preeceded text
   #
   @precede: (start, fn) ->
-    start + fn()
+    start + fn.call(@)?.replace(/^\s+/g, '')
+
+  # The reference helper creates id and class attributes
+  # for an object reference.
+  #
+  # @param [Object] object the referenced object
+  # @param [String] prefix the optional id and class prefix
+  # @return [String] the id and class attributes
+  #
+  @reference: (object, prefix) ->
+    name = if prefix then prefix + '_' else ''
+
+    if typeof(object.hamlObjectRef) is 'function'
+      name += object.hamlObjectRef()
+    else
+      name += (object.constructor?.name || 'object').replace(/\W+/g, '_').replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase()
+
+    id = if typeof(object.to_key) is 'function'
+           object.to_key()
+         else if typeof(object.id) is 'function'
+            object.id()
+         else if object.id
+           object.id
+         else
+           object
+
+    result  = "class='#{ name }'"
+    result += " id='#{ name }_#{ id }'" if id
