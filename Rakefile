@@ -11,7 +11,7 @@ require 'jasmine'
 load 'jasmine/tasks/jasmine.rake'
 
 ENV['RACK_ENV'] ||= 'development'
-Config = YAML.load_file('config/app.yml')
+Config = YAML.load_file('config.yml')
 
 class SprocketsEnvironmentBuilder
   def self.build(environment = :development)

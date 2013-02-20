@@ -4,7 +4,7 @@ require 'colored'
 require 'yaml'
 
 ENV['RACK_ENV'] = 'production'
-config = YAML.load_file('config/app.yml')
+config = YAML.load_file('config.yml')
 
 puts "* Compiling assets".green
 

@@ -19,7 +19,7 @@ class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
   end
 end
 
-config = YAML.load_file('config/app.yml')
+config = YAML.load_file('config.yml')
 
 server = WEBrick::HTTPServer.new :Port => config['port']
 server.mount '/', NonCachingFileHandler , "#{Dir.pwd}/#{config['compile_folder']}"
