@@ -2,6 +2,6 @@
 
 `./server.rb` for running the development server.
 
-`rake test` for testing Javascripts.
+`rake jasmine` for testing Javascripts.
 
 `./deploy.rb` for compiling and deploying static files to gh-pages.
