@@ -33,7 +33,7 @@ end
 
 task :guard do
   Rake::Task["assets:compile_all"].invoke
-  ::Guard.start
+  exec("bundle exec guard")
 end
 
 namespace :assets do
